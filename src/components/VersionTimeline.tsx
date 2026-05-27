@@ -12,40 +12,38 @@ export function VersionTimeline({ history }: VersionTimelineProps) {
 
   if (history.length === 0) {
     return (
-      <p className="text-sm text-gray-400 py-4">
+      <p className="text-sm text-muted-foreground py-8 text-center">
         Sin historial de versiones registrado.
       </p>
     )
   }
 
   return (
-    <ol className="relative border-l border-gray-200 space-y-6 ml-3">
+    <ol className="relative border-l-2 border-border space-y-8 ml-4">
       {history.map((entry, index) => {
         const version = entry.system_versions
         const isLatest = version?.is_latest ?? false
         const isCurrent = index === 0
         return (
-          <li key={entry.id} className="ml-6">
+          <li key={entry.id} className="ml-8">
             <span
-              className={`absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full ring-8 ring-white ${
-                isCurrent ? 'bg-blue-600' : 'bg-gray-300'
+              className={`absolute -left-[11px] flex h-5 w-5 items-center justify-center rounded-full ring-[5px] ring-card ${
+                isCurrent ? 'bg-primary' : 'bg-secondary'
               }`}
-            >
-              <svg className="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 2a8 8 0 100 16A8 8 0 0010 2z" />
-              </svg>
-            </span>
-            <div className="flex items-center gap-2 mb-1">
+            />
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               {version ? (
                 <VersionBadge version={version} isLatest={isLatest} />
               ) : (
-                <span className="text-xs text-gray-400">Versión desconocida</span>
+                <span className="text-xs text-muted-foreground font-mono">Versión desconocida</span>
               )}
               {isCurrent && (
-                <span className="text-xs font-medium text-blue-600">Versión actual</span>
+                <span className="text-[11px] font-medium text-primary tracking-wider uppercase">
+                  — Actual
+                </span>
               )}
             </div>
-            <time className="block text-xs text-gray-500">
+            <time className="block text-xs text-muted-foreground font-mono">
               {new Date(entry.installed_at).toLocaleDateString('es-MX', {
                 year: 'numeric',
                 month: 'long',
@@ -54,7 +52,7 @@ export function VersionTimeline({ history }: VersionTimelineProps) {
               })}
             </time>
             {entry.notes && (
-              <p className="mt-1 text-sm text-gray-600">{entry.notes}</p>
+              <p className="mt-2 text-sm text-muted-foreground/80 leading-relaxed">{entry.notes}</p>
             )}
           </li>
         )

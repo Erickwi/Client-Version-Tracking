@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 import type { SystemVersion } from '@/types'
 
 interface VersionBadgeProps {
-  version: SystemVersion
+  version: SystemVersion | { version_number: string }
   isLatest?: boolean
   className?: string
 }
@@ -11,16 +11,16 @@ export function VersionBadge({ version, isLatest, className }: VersionBadgeProps
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-mono text-xs',
+        'inline-flex items-center gap-2 rounded-md border px-2.5 py-1 font-mono text-xs font-medium',
         isLatest
-          ? 'border-blue-300 bg-blue-50 text-blue-700'
-          : 'border-gray-200 bg-gray-50 text-gray-600',
+          ? 'border-primary/30 bg-primary/5 text-primary'
+          : 'border-border bg-secondary/30 text-muted-foreground',
         className,
       )}
     >
-      v{version.version_number}
+      <span className={cn(isLatest && 'text-primary')}>v{version.version_number}</span>
       {isLatest && (
-        <span className="rounded bg-blue-600 px-1 py-0.5 text-[10px] font-semibold text-white leading-none">
+        <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground leading-none tracking-wider">
           LATEST
         </span>
       )}

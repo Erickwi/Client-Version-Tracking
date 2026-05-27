@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Search } from 'lucide-react'
 import type { ClientStatus } from '@/types'
 
 export function ClientTable() {
@@ -23,13 +24,16 @@ export function ClientTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-3 flex-wrap">
-        <Input
-          placeholder="Buscar cliente..."
-          value={filters.search}
-          onChange={(e) => $filters.set({ ...filters, search: e.target.value })}
-          className="max-w-xs"
-        />
+      <div className="flex gap-3 flex-wrap items-center">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar cliente..."
+            value={filters.search}
+            onChange={(e) => $filters.set({ ...filters, search: e.target.value })}
+            className="pl-9"
+          />
+        </div>
         <Select
           value={filters.status}
           onChange={(e) =>
@@ -44,31 +48,44 @@ export function ClientTable() {
         </Select>
       </div>
 
-      <div className="rounded-lg border">
+      <div className="rounded-xl border border-border overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Versión actual</TableHead>
-              <TableHead>Última actualización</TableHead>
-              <TableHead>Notas</TableHead>
+            <TableRow className="bg-secondary/30">
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Cliente
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Estado
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Versión actual
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hidden md:table-cell">
+                Última actualización
+              </TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hidden lg:table-cell">
+                Notas
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-gray-400 py-8">
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-12 text-sm">
                   No se encontraron clientes
                 </TableCell>
               </TableRow>
             ) : (
               clients.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell className="font-medium">
+                <TableRow
+                  key={client.id}
+                  className="hover:bg-secondary/20 transition-colors"
+                >
+                  <TableCell>
                     <Link
                       to={`/clients/${client.id}`}
-                      className="hover:underline text-blue-600"
+                      className="font-medium text-foreground hover:text-primary transition-colors"
                     >
                       {client.name}
                     </Link>
@@ -83,15 +100,15 @@ export function ClientTable() {
                         isLatest={client.status === 'updated'}
                       />
                     ) : (
-                      <span className="text-gray-400 text-xs">—</span>
+                      <span className="text-muted-foreground text-xs font-mono">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-500">
+                  <TableCell className="text-sm text-muted-foreground font-mono hidden md:table-cell">
                     {client.latest_installed_at
                       ? new Date(client.latest_installed_at).toLocaleDateString('es-MX', { timeZone: 'UTC' })
                       : '—'}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-500 max-w-xs truncate">
+                  <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate hidden lg:table-cell">
                     {client.notes ?? '—'}
                   </TableCell>
                 </TableRow>

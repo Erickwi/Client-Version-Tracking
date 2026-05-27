@@ -4,8 +4,7 @@ import { $versions, $versionsLoading, fetchVersions, createVersion, setLatestVer
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Star } from 'lucide-react'
+import { Plus, Layers, Star } from 'lucide-react'
 
 export function Versions() {
   const versions = useStore($versions)
@@ -57,86 +56,109 @@ export function Versions() {
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 max-w-3xl">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Versiones del sistema</h1>
-          <p className="text-gray-500 text-sm mt-1">{versions.length} versiones registradas</p>
+          <h1 className="font-heading text-4xl sm:text-5xl tracking-[0.05em] text-foreground leading-none">
+            VERSIONES
+          </h1>
+          <p className="text-muted-foreground font-body text-sm mt-2 flex items-center gap-2">
+            <Layers className="w-4 h-4" />
+            {versions.length} versiones registradas
+          </p>
         </div>
-        <Button onClick={() => setShowForm((v) => !v)} size="sm">
-          <Plus className="h-4 w-4" />
-          Nueva versión
+        <Button
+          onClick={() => setShowForm((v) => !v)}
+          variant={showForm ? 'outline' : 'default'}
+          size="sm"
+        >
+          {showForm ? null : <Plus className="h-4 w-4" />}
+          {showForm ? 'Cancelar' : 'Nueva versión'}
         </Button>
       </div>
 
       {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Registrar versión</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Número de versión *</label>
-                <Input
-                  value={versionNumber}
-                  onChange={(e) => setVersionNumber(e.target.value)}
-                  placeholder="Ej: 2.3.1"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Fecha de lanzamiento *</label>
-                <Input
-                  type="date"
-                  value={releaseDate}
-                  onChange={(e) => setReleaseDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Changelog</label>
-                <Textarea
-                  value={changelog}
-                  onChange={(e) => setChangelog(e.target.value)}
-                  placeholder="Cambios incluidos en esta versión..."
-                  rows={4}
-                />
-              </div>
-              {error && <p className="text-sm text-red-600">{error}</p>}
-              <div className="flex gap-2">
-                <Button type="submit" disabled={saving}>
-                  {saving ? 'Guardando...' : 'Guardar'}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="font-heading text-lg tracking-[0.08em] text-foreground mb-5">
+            REGISTRAR VERSIÓN
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Número de versión *</label>
+              <Input
+                value={versionNumber}
+                onChange={(e) => setVersionNumber(e.target.value)}
+                placeholder="Ej: 2.3.1"
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Fecha de lanzamiento *</label>
+              <Input
+                type="date"
+                value={releaseDate}
+                onChange={(e) => setReleaseDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Changelog</label>
+              <Textarea
+                value={changelog}
+                onChange={(e) => setChangelog(e.target.value)}
+                placeholder="Cambios incluidos en esta versión..."
+                rows={4}
+              />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <div className="flex gap-2">
+              <Button type="submit" disabled={saving}>
+                {saving ? 'Guardando...' : 'Guardar'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </div>
       )}
 
       {loading ? (
-        <p className="text-gray-400 text-sm">Cargando versiones...</p>
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <p className="text-sm text-muted-foreground">Cargando versiones...</p>
+          </div>
+        </div>
       ) : versions.length === 0 ? (
-        <p className="text-gray-400 text-sm">No hay versiones registradas aún.</p>
+        <div className="text-center py-12">
+          <Layers className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">No hay versiones registradas aún.</p>
+        </div>
       ) : (
         <div className="space-y-3">
           {versions.map((v) => (
-            <Card key={v.id} className={v.is_latest ? 'border-blue-300' : ''}>
-              <CardContent className="p-4 flex items-start justify-between gap-4">
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-semibold">v{v.version_number}</span>
+            <div
+              key={v.id}
+              className={`rounded-xl border p-5 transition-all duration-200 hover:border-primary/30 ${
+                v.is_latest ? 'border-primary/40 bg-primary/[0.02]' : 'border-border bg-card'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-2 min-w-0 flex-1">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className={`font-heading text-2xl tracking-wider ${v.is_latest ? 'text-primary' : 'text-foreground'}`}>
+                      v{v.version_number}
+                    </span>
                     {v.is_latest && (
-                      <span className="rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                        LATEST
+                      <span className="rounded bg-primary px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground tracking-wider uppercase">
+                        Latest
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500">
-                    Lanzado el {new Date(v.release_date).toLocaleDateString('es-MX', {
+                  <p className="text-xs text-muted-foreground font-mono">
+                    Lanzado el{' '}
+                    {new Date(v.release_date).toLocaleDateString('es-MX', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -144,7 +166,9 @@ export function Versions() {
                     })}
                   </p>
                   {v.changelog && (
-                    <p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{v.changelog}</p>
+                    <p className="text-sm text-muted-foreground/80 mt-2 whitespace-pre-wrap leading-relaxed">
+                      {v.changelog}
+                    </p>
                   )}
                 </div>
                 {!v.is_latest && (
@@ -153,13 +177,14 @@ export function Versions() {
                     variant="outline"
                     disabled={settingLatest === v.id}
                     onClick={() => handleSetLatest(v.id)}
+                    className="shrink-0"
                   >
-                    <Star className="h-3 w-3" />
-                    {settingLatest === v.id ? 'Aplicando...' : 'Marcar como latest'}
+                    <Star className="w-3 h-3" />
+                    {settingLatest === v.id ? 'Aplicando...' : 'Marcar latest'}
                   </Button>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}

@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { useStore } from '@nanostores/react'
 import { $stats, fetchClients } from '@/stores/clients'
 import { $versions, $latestVersion, fetchVersions } from '@/stores/versions'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { Users, CheckCircle, Clock, AlertCircle, ArrowUpRight } from 'lucide-react'
+import { VersionBadge } from '@/components/VersionBadge'
 
 export function Dashboard() {
   const stats = useStore($stats)
@@ -15,119 +15,176 @@ export function Dashboard() {
     fetchVersions()
   }, [])
 
-  const updatedPct = stats.total > 0 ? Math.round((stats.updated / stats.total) * 100) : 0
+  const progress = stats.total > 0 ? Math.round((stats.updated / stats.total) * 100) : 0
+
+  const statCards = [
+    {
+      label: 'Total Clientes',
+      value: stats.total,
+      icon: Users,
+      color: 'text-foreground',
+      bgAccent: 'bg-secondary/50',
+    },
+    {
+      label: 'Actualizados',
+      value: stats.updated,
+      icon: CheckCircle,
+      color: 'text-success',
+      bgAccent: 'bg-success/10',
+    },
+    {
+      label: 'Pendientes',
+      value: stats.pending,
+      icon: Clock,
+      color: 'text-warning',
+      bgAccent: 'bg-warning/10',
+    },
+    {
+      label: 'Con Error',
+      value: stats.error,
+      icon: AlertCircle,
+      color: 'text-destructive',
+      bgAccent: 'bg-destructive/10',
+    },
+  ]
+
+  const today = new Date().toLocaleDateString('es-MX', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Resumen del estado de actualización de clientes
-          {latestVersion && (
-            <> — versión actual del sistema: <strong>v{latestVersion.version_number}</strong></>
-          )}
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-4xl sm:text-5xl tracking-[0.05em] text-foreground leading-none">
+            PANEL DE CONTROL
+          </h1>
+          <p className="text-muted-foreground font-body text-sm mt-2 capitalize">
+            {today}
+          </p>
+        </div>
+        {latestVersion && (
+          <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-4 py-2.5 shrink-0">
+            <ArrowUpRight className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium text-muted-foreground">Última versión:</span>
+            <VersionBadge version={latestVersion} isLatest />
+          </div>
+        )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total clientes"
-          value={stats.total}
-          icon={<Users className="h-4 w-4 text-gray-500" />}
-        />
-        <StatCard
-          title="Actualizados"
-          value={stats.updated}
-          icon={<CheckCircle className="h-4 w-4 text-green-500" />}
-          valueClass="text-green-600"
-        />
-        <StatCard
-          title="Pendientes"
-          value={stats.pending}
-          icon={<Clock className="h-4 w-4 text-yellow-500" />}
-          valueClass="text-yellow-600"
-        />
-        <StatCard
-          title="Con error"
-          value={stats.error}
-          icon={<AlertCircle className="h-4 w-4 text-red-500" />}
-          valueClass="text-red-600"
-        />
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Progreso de actualización</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">{stats.updated} de {stats.total} clientes actualizados</span>
-            <span className="font-semibold">{updatedPct}%</span>
-          </div>
-          <div className="h-3 w-full rounded-full bg-gray-100 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-green-500 transition-all duration-500"
-              style={{ width: `${updatedPct}%` }}
-            />
-          </div>
-          {stats.pending > 0 && (
-            <p className="text-xs text-yellow-600">
-              {stats.pending} cliente{stats.pending > 1 ? 's' : ''} aún pendiente{stats.pending > 1 ? 's' : ''} de actualizar
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((card) => (
+          <div
+            key={card.label}
+            className="relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all duration-300 hover:border-primary/30 group"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className={`p-2 rounded-lg ${card.bgAccent}`}>
+                <card.icon className={`w-5 h-5 ${card.color}`} />
+              </div>
+            </div>
+            <div className={`font-heading text-3xl sm:text-4xl tracking-wider ${card.color}`}>
+              {card.value}
+            </div>
+            <p className="text-muted-foreground text-xs font-medium mt-1 uppercase tracking-wider">
+              {card.label}
             </p>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        ))}
+      </div>
 
-      {versions.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Versiones del sistema</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="rounded-xl border border-border bg-card p-6 lg:col-span-1">
+          <h2 className="font-heading text-xl tracking-[0.08em] text-foreground mb-6">
+            PROGRESO
+          </h2>
+          <div className="flex flex-col items-center justify-center py-4">
+            <div className="relative w-32 h-32 mb-4">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle
+                  cx="18" cy="18" r="15.5"
+                  fill="none"
+                  stroke="hsl(var(--secondary))"
+                  strokeWidth="3"
+                />
+                <circle
+                  cx="18" cy="18" r="15.5"
+                  fill="none"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="3"
+                  strokeDasharray={`${progress * 0.979} 100`}
+                  strokeLinecap="round"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="font-heading text-3xl text-primary">{progress}%</span>
+              </div>
+            </div>
+            <p className="text-muted-foreground text-xs font-medium">de clientes actualizados</p>
+          </div>
+          <div className="space-y-3 mt-2">
+            <div className="flex justify-between text-xs">
+              <span className="text-success font-medium">{stats.updated} actualizados</span>
+              <span className="text-muted-foreground">{stats.total - stats.updated} restantes</span>
+            </div>
+            <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+              <div
+                className="h-full bg-success rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-6 lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-heading text-xl tracking-[0.08em] text-foreground">
+              VERSIONES DEL SISTEMA
+            </h2>
+            <span className="text-xs text-muted-foreground font-mono">
+              {versions.length} registradas
+            </span>
+          </div>
+          {versions.length > 0 ? (
             <div className="space-y-2">
-              {versions.map((v) => (
-                <div key={v.id} className="flex items-center justify-between text-sm py-1 border-b last:border-0">
-                  <span className="font-mono font-medium">v{v.version_number}</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-gray-400">
-                      {new Date(v.release_date).toLocaleDateString('es-MX', { timeZone: 'UTC' })}
+              {versions.slice(0, 6).map((v, i) => (
+                <div
+                  key={v.id}
+                  className="flex items-center justify-between px-4 py-3 rounded-lg bg-secondary/20 hover:bg-secondary/40 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-muted-foreground font-mono text-xs tabular-nums w-5 shrink-0">
+                      {String(versions.length - i).padStart(2, '0')}
                     </span>
-                    {v.is_latest && (
-                      <span className="rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                        LATEST
+                    <VersionBadge version={v} isLatest={v.is_latest} />
+                    {v.changelog && (
+                      <span className="text-sm text-muted-foreground truncate hidden sm:block max-w-[280px]">
+                        {v.changelog}
                       </span>
                     )}
                   </div>
+                  <span className="text-xs text-muted-foreground font-mono shrink-0">
+                    {new Date(v.release_date).toLocaleDateString('es-MX', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      timeZone: 'UTC',
+                    })}
+                  </span>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <p className="text-muted-foreground text-sm text-center py-8">
+              No hay versiones registradas
+            </p>
+          )}
+        </div>
+      </div>
     </div>
-  )
-}
-
-function StatCard({
-  title,
-  value,
-  icon,
-  valueClass = '',
-}: {
-  title: string
-  value: number
-  icon: React.ReactNode
-  valueClass?: string
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-gray-500">{title}</CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <div className={`text-3xl font-bold ${valueClass}`}>{value}</div>
-      </CardContent>
-    </Card>
   )
 }

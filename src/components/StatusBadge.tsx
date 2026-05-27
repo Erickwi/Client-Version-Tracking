@@ -1,18 +1,23 @@
 import { cn } from '@/lib/utils'
+import { CheckCircle, Clock, AlertTriangle } from 'lucide-react'
 import type { ClientStatus } from '@/types'
+import type { LucideIcon } from 'lucide-react'
 
-const config: Record<ClientStatus, { label: string; className: string }> = {
+const config: Record<ClientStatus, { label: string; icon: LucideIcon; className: string }> = {
   updated: {
     label: 'Actualizado',
-    className: 'bg-green-100 text-green-800 border-green-200',
+    icon: CheckCircle,
+    className: 'text-success border-success/30 bg-success/5',
   },
   pending: {
     label: 'Pendiente',
-    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    icon: Clock,
+    className: 'text-warning border-warning/30 bg-warning/5',
   },
   error: {
     label: 'Error',
-    className: 'bg-red-100 text-red-800 border-red-200',
+    icon: AlertTriangle,
+    className: 'text-destructive border-destructive/30 bg-destructive/5',
   },
 }
 
@@ -22,15 +27,16 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const { label, className: statusClass } = config[status]
+  const { label, icon: Icon, className: statusClass } = config[status]
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold',
+        'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium',
         statusClass,
         className,
       )}
     >
+      <Icon className="w-3.5 h-3.5" />
       {label}
     </span>
   )

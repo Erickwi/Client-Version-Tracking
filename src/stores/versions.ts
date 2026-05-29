@@ -20,7 +20,7 @@ export async function fetchVersions() {
   if (error) {
     $versionsError.set(error.message)
   } else {
-    $versions.set(data ?? [])
+    $versions.set((data ?? []) as any[])
   }
   $versionsLoading.set(false)
 }
@@ -28,21 +28,15 @@ export async function fetchVersions() {
 export async function createVersion(
   payload: { version_number: string; release_date: string; changelog?: string },
 ) {
-  const { error } = await supabase.from('system_versions').insert(payload)
+  const { error } = await supabase.from('system_versions').insert(payload as any)
   if (error) throw new Error(error.message)
   await fetchVersions()
 }
 
 export async function setLatestVersion(id: string) {
   // Unset all, then set the selected one
-  await supabase
-    .from('system_versions')
-    .update({ is_latest: false })
-    .neq('id', id)
-  const { error } = await supabase
-    .from('system_versions')
-    .update({ is_latest: true })
-    .eq('id', id)
+  await (supabase as any).from('system_versions').update({ is_latest: false } as any).neq('id', id)
+  const { error } = await (supabase as any).from('system_versions').update({ is_latest: true } as any).eq('id', id)
   if (error) throw new Error(error.message)
   await fetchVersions()
 }

@@ -43,15 +43,16 @@ export async function fetchClients() {
   if (error) {
     $clientsError.set(error.message)
   } else {
-    const mapped = (data ?? []).map((c: typeof data[number]) => {
-      const history: { installed_at: string }[] = (c as any).client_version_history ?? []
+    const rows = (data ?? []) as any[]
+    const mapped = rows.map((c: any) => {
+      const history: { installed_at: string }[] = c.client_version_history ?? []
       const latest = history
         .map((h) => h.installed_at)
         .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null
-      const { client_version_history: _h, ...rest } = c as any
+      const { client_version_history: _h, ...rest } = c
       return { ...rest, latest_installed_at: latest }
     })
-    $clients.set(mapped)
+    $clients.set(mapped as any[])
   }
   $clientsLoading.set(false)
 }
@@ -69,12 +70,13 @@ export async function fetchClientWithHistory(id: string): Promise<ClientWithHist
     .eq('id', id)
     .single()
   if (error) throw new Error(error.message)
-  const history = (data.client_version_history ?? []).sort(
+  const row = data as any
+  const history = (row.client_version_history ?? []).sort(
     (a: { installed_at: string }, b: { installed_at: string }) =>
       new Date(b.installed_at).getTime() - new Date(a.installed_at).getTime(),
   )
   return {
-    ...data,
+    ...(row as any),
     client_version_history: history,
     current_version: history[0]?.system_versions ?? undefined,
   }
@@ -82,9 +84,9 @@ export async function fetchClientWithHistory(id: string): Promise<ClientWithHist
 
 export async function createClient(payload: { name: string; notes?: string }) {
   const { error } = await supabase.from('clients').insert({
-    ...payload,
+    ...(payload as any),
     status: 'pending',
-  })
+  } as any)
   if (error) throw new Error(error.message)
   await fetchClients()
 }
@@ -93,7 +95,7 @@ export async function updateClient(
   id: string,
   payload: Partial<Pick<Client, 'name' | 'notes' | 'status'>>,
 ) {
-  const { error } = await supabase.from('clients').update(payload).eq('id', id)
+  const { error } = await (supabase as any).from('clients').update(payload as any).eq('id', id)
   if (error) throw new Error(error.message)
   await fetchClients()
 }
@@ -113,6 +115,6 @@ export async function addVersionToClient(
     client_id: clientId,
     version_id: versionId,
     notes: notes ?? null,
-  })
+  } as any)
   if (error) throw new Error(error.message)
 }
